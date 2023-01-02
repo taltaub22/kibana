@@ -33,6 +33,10 @@ export const MonitorPage: React.FC = () => {
     dispatch(getMonitorAlertsAction.get());
   }, [monitorId, dispatch]);
 
+  useEffect(() => () => {
+    dispatch(setSelectedMonitorId(''));
+  }, [dispatch])
+
   useTrackPageview({ app: 'uptime', path: 'monitor' });
   useTrackPageview({ app: 'uptime', path: 'monitor', delay: 15000 });
 

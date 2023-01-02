@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { isRight } from 'fp-ts/lib/Either';
-import { selectedFiltersSelector } from '../../../../state/selectors';
+import { monitorIdSelector, selectedFiltersSelector} from '../../../../state/selectors';
 import { AlertMonitorStatusComponent } from '../monitor_status_alert/alert_monitor_status';
-import { setSearchTextAction } from '../../../../state/actions';
-import {
-  AtomicStatusCheckParamsType,
-  GetMonitorAvailabilityParamsType,
-} from '../../../../../../common/runtime_types';
-
+import { AtomicStatusCheckParamsType, GetMonitorAvailabilityParamsType } from '../../../../../../common/runtime_types';
 import { useSnapShotCount } from './use_snap_shot';
 import { FILTER_FIELDS } from '../../../../../../common/constants';
+import { MONITOR_ID } from '../../../../../../common/field_names';
+import { setSearchTextAction } from "@kbn/synthetics-plugin/public/legacy_uptime/state/actions";
 
 const { TYPE, TAGS, LOCATION, PORT } = FILTER_FIELDS;
 
@@ -42,12 +39,19 @@ export const AlertMonitorStatus: React.FC<Props> = ({
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (ruleParams.search) {
+   if (ruleParams.search) {
       dispatch(setSearchTextAction(ruleParams.search));
     }
   }, [ruleParams, dispatch]);
 
-  const { count, loading } = useSnapShotCount({
+  const selectedMonitorId = useSelector(monitorIdSelector);
+  useEffect(() => {
+    if((!ruleParams.search || ruleParams.search == '') && (selectedMonitorId != null && selectedMonitorId != '')){
+      setRuleParams('search', `${MONITOR_ID}: "${selectedMonitorId}"`);
+    }
+  }, [selectedMonitorId]);
+
+   let {count, loading} = useSnapShotCount({
     query: ruleParams.search,
     filters: ruleParams.filters,
   });
